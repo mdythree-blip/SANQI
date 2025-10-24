@@ -115,7 +115,7 @@
         
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 15px;
             margin-top: 15px;
         }
@@ -126,12 +126,15 @@
             border-radius: 10px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
         }
         
         .feature i {
             color: #1DA1F2;
-            margin-right: 10px;
-            font-size: 18px;
+            margin-bottom: 10px;
+            font-size: 24px;
         }
         
         .download-section {
@@ -242,24 +245,26 @@
                 <h2 class="section-title"><i class="fas fa-info-circle"></i> 应用描述</h2>
                 <div class="description">
                     <p>X是官方正版应用，提供最新的社交功能和体验。此版本为官方最新发布版本，确保您获得最完整的功能和最佳的性能。</p>
-                    <p><strong>重要提示：</strong> 使用此应用需要科学上网，请确保您的网络环境支持。</p>
+                    <p><strong>特色功能：</strong> 实时信息流、多媒体分享、私信聊天、趋势话题等。</p>
                 </div>
                 
                 <div class="features">
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-shield-alt"></i>
                         <span>官方正版应用</span>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-star"></i>
                         <span>最新功能体验</span>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-rocket"></i>
                         <span>稳定可靠</span>
                     </div>
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+            
+            <div class="section">
                 <h2 class="section-title"><i class="fas fa-download"></i> 下载应用</h2>
                 <div class="download-section">
                     <h3 class="download-title">选择下载方式</h3>
@@ -278,13 +283,13 @@
                 
                 <div class="notice">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <span>下载后请确保在科学上网环境下使用，否则可能无法正常连接</span>
+                    <span>下载后请确保您的网络环境稳定，以获得最佳使用体验</span>
                 </div>
             </div>
         </div>
         
         <div class="footer">
-            <p>© 2025 X - 官方正版应用</p>
+            <p>© 2023 X - 官方正版应用</p>
         </div>
     </div>
 </body>
