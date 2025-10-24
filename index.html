@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>应用分发中心 | 您的名字</title>
+    <title>应用分发 | MDYthree or LINF</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -12,7 +12,6 @@
             --accent: #f72585;
             --light: #f8f9fa;
             --dark: #212529;
-            --gray: #6c757d;
             --success: #4cc9f0;
         }
         
@@ -110,6 +109,7 @@
             border: 5px solid white;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
         }
         
         .hero h1 {
@@ -122,16 +122,6 @@
             font-size: 1.3rem;
             margin-bottom: 30px;
             opacity: 0.9;
-        }
-        
-        .tagline {
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto 40px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px 25px;
-            border-radius: 30px;
-            backdrop-filter: blur(10px);
         }
         
         /* 软件分发区域 */
@@ -149,12 +139,6 @@
             font-size: 2.5rem;
             color: var(--dark);
             margin-bottom: 15px;
-        }
-        
-        .section-title p {
-            color: var(--gray);
-            max-width: 600px;
-            margin: 0 auto;
         }
         
         .software-grid {
@@ -202,14 +186,9 @@
             flex-direction: column;
         }
         
-        .card-body p {
-            margin-bottom: 20px;
-            color: var(--gray);
-            flex-grow: 1;
-        }
-        
         .features {
             margin-bottom: 20px;
+            list-style: none;
         }
         
         .features li {
@@ -250,57 +229,28 @@
             margin-right: 8px;
         }
         
+        .btn-disabled {
+            background: linear-gradient(to right, #6c757d, #495057);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+            cursor: not-allowed;
+        }
+        
+        .btn-disabled:hover {
+            background: linear-gradient(to right, #6c757d, #495057);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+            transform: none;
+        }
+        
         /* 页脚 */
         footer {
             background: var(--dark);
             color: white;
-            padding: 60px 0 30px;
-        }
-        
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-        
-        .footer-column h3 {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            color: var(--light);
-        }
-        
-        .footer-column p {
-            margin-bottom: 15px;
-            opacity: 0.8;
-        }
-        
-        .social-links {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .social-links a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            color: white;
-            transition: all 0.3s;
-        }
-        
-        .social-links a:hover {
-            background: var(--primary);
-            transform: translateY(-3px);
+            padding: 30px 0 20px;
+            text-align: center;
         }
         
         .copyright {
-            text-align: center;
-            padding-top: 30px;
+            padding-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             opacity: 0.7;
         }
@@ -364,8 +314,6 @@
             <div class="nav-links">
                 <a href="#home">首页</a>
                 <a href="#software">应用下载</a>
-                <a href="#about">关于我</a>
-                <a href="#contact">联系</a>
             </div>
         </div>
     </nav>
@@ -374,13 +322,10 @@
     <section class="hero" id="home">
         <div class="container hero-content">
             <div class="profile-section">
-                <!-- 请将下面的图片URL替换为您自己的头像 -->
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" alt="个人头像" class="avatar">
-                <h1>您的名字</h1>
-                <p>软件开发者 & 应用分享者</p>
-            </div>
-            <div class="tagline">
-                专注于开发和分享高质量的应用程序。所有软件均为免费使用，欢迎下载体验。
+                <!-- 头像占位符 - 可以替换为您的头像 -->
+                <div class=""></div>
+                <h1>MDYthree or LINF</h1>
+                <p>应用分发 :-D</p>
             </div>
         </div>
     </section>
@@ -390,25 +335,21 @@
         <div class="container">
             <div class="section-title">
                 <h2>我的应用分发</h2>
-                <p>以下是我开发和分享的应用程序，点击下载按钮获取最新版本</p>
             </div>
             
             <div class="software-grid">
-                <!-- 酷我分享应用卡片 -->
+                <!-- 酷我音乐应用卡片 -->
                 <div class="software-card">
                     <div class="card-header">
                         <i class="fas fa-music"></i>
-                        <h3>酷我分享应用</h3>
-                        <p>版本 2.1.5 | 最新更新</p>
+                        <h3>酷我音乐</h3>
+                        <p>版本 11.3.6.0 | 2025.10更新</p>
                     </div>
                     <div class="card-body">
-                        <p>一款功能强大的音乐分享应用，提供高品质音乐播放、个性化推荐和社交分享功能。支持多种音频格式和在线流媒体。</p>
-                        
                         <ul class="features">
-                            <li><i class="fas fa-check-circle"></i> 高品质音乐播放</li>
-                            <li><i class="fas fa-check-circle"></i> 智能推荐系统</li>
-                            <li><i class="fas fa-check-circle"></i> 社交分享功能</li>
-                            <li><i class="fas fa-check-circle"></i> 多平台支持</li>
+                            <li><i class="fas fa-check-circle"></i> 解锁本地SVIP</li>
+                            <li><i class="fas fa-check-circle"></i> 高品质音乐下载</li>
+                            <li><i class="fas fa-check-circle"></i> 无广告体验</li>
                         </ul>
                         
                         <a href="kuwofenx.html" class="btn">
@@ -425,8 +366,6 @@
                         <p>版本 1.2.0 | 即将发布</p>
                     </div>
                     <div class="card-body">
-                        <p>一款功能全面的图像和视频编辑工具，提供专业级的编辑功能，同时保持简洁易用的界面设计。</p>
-                        
                         <ul class="features">
                             <li><i class="fas fa-check-circle"></i> 高级图像处理</li>
                             <li><i class="fas fa-check-circle"></i> 视频剪辑功能</li>
@@ -434,7 +373,7 @@
                             <li><i class="fas fa-check-circle"></i> 直观的用户界面</li>
                         </ul>
                         
-                        <a href="#" class="btn" style="background: linear-gradient(to right, #6c757d, #495057); box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);">
+                        <a href="#" class="btn btn-disabled">
                             <i class="fas fa-clock"></i> 即将推出
                         </a>
                     </div>
@@ -448,8 +387,6 @@
                         <p>版本 1.5.3 | 稳定版本</p>
                     </div>
                     <div class="card-body">
-                        <p>提高工作和学习效率的得力助手，包含任务管理、时间跟踪、笔记记录和团队协作等多项功能。</p>
-                        
                         <ul class="features">
                             <li><i class="fas fa-check-circle"></i> 智能任务管理</li>
                             <li><i class="fas fa-check-circle"></i> 时间跟踪统计</li>
@@ -457,7 +394,7 @@
                             <li><i class="fas fa-check-circle"></i> 团队协作功能</li>
                         </ul>
                         
-                        <a href="#" class="btn" style="background: linear-gradient(to right, #6c757d, #495057); box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);">
+                        <a href="#" class="btn btn-disabled">
                             <i class="fas fa-clock"></i> 即将推出
                         </a>
                     </div>
@@ -467,37 +404,10 @@
     </section>
     
     <!-- 页脚 -->
-    <footer id="contact">
+    <footer>
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>关于我</h3>
-                    <p>热爱技术的软件开发者，专注于创建实用且用户友好的应用程序。</p>
-                    <p>所有分享的软件均为免费使用，欢迎反馈和建议。</p>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>联系我</h3>
-                    <p><i class="fas fa-envelope"></i> your.email@example.com</p>
-                    <p><i class="fas fa-map-marker-alt"></i> 您的城市，国家</p>
-                    
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-github"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="#"><i class="fab fa-weibo"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>支持</h3>
-                    <p>如果您在使用过程中遇到任何问题，或有任何建议，请通过电子邮件联系我。</p>
-                    <p>我会尽快回复并解决问题。</p>
-                </div>
-            </div>
-            
             <div class="copyright">
-                <p>&copy; 2023 应用分发中心 | 使用 GitHub Pages 部署</p>
+                <p>&copy; 2025 应用分发中心 | 使用 GitHub Pages 部署</p>
             </div>
         </div>
     </footer>
