@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube - 应用分发</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --youtube-red: #ff0000;
+            --youtube-dark: #0f0f0f;
+            --youtube-gray: #272727;
+            --youtube-light: #f1f1f1;
+            --youtube-text: #ffffff;
+            --youtube-secondary: #aaaaaa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+            color: var(--youtube-text);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: rgba(39, 39, 39, 0.8);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 应用头部 */
+        .app-header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #272727 100%);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .app-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.1) 0%, transparent 70%);
+            z-index: 1;
+        }
+        
+        .app-icon-container {
+            position: relative;
+            z-index: 2;
+            margin-bottom: 20px;
+        }
+        
+        .app-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            margin: 0 auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .app-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .app-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+            color: var(--youtube-text);
+        }
+        
+        .app-version {
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.1);
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            color: var(--youtube-secondary);
+        }
+        
+        /* 应用详情区域 */
+        .app-detail-section {
+            padding: 30px;
+        }
+        
+        .app-description {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            color: var(--youtube-secondary);
+            text-align: center;
+        }
+        
+        .features {
+            margin-bottom: 30px;
+            list-style: none;
+        }
+        
+        .features li {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+        }
+        
+        .features i {
+            color: var(--youtube-red);
+            font-size: 14px;
+        }
+        
+        /* 下载区域 */
+        .download-section {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .download-title {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: var(--youtube-text);
+            text-align: center;
+        }
+        
+        .download-options {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .download-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, var(--youtube-red), #cc0000);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 0, 0, 0.2);
+        }
+        
+        .download-btn:hover {
+            background: linear-gradient(135deg, #cc0000, var(--youtube-red));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 0, 0, 0.3);
+        }
+        
+        .download-btn i {
+            font-size: 20px;
+        }
+        
+        .password-note {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .password-note i {
+            color: #ffcc00;
+            font-size: 20px;
+        }
+        
+        .password-code {
+            font-weight: bold;
+            color: #ffcc00;
+            font-size: 18px;
+            margin-left: 8px;
+        }
+        
+        .notice {
+            background-color: rgba(255, 0, 0, 0.1);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid var(--youtube-red);
+        }
+        
+        .notice i {
+            color: var(--youtube-red);
+            font-size: 20px;
+        }
+        
+        /* 页脚 */
+        footer {
+            padding: 30px 0 20px;
+            text-align: center;
+            color: var(--youtube-secondary);
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .app-header {
+                padding: 30px 20px;
+            }
+            
+            .app-title {
+                font-size: 28px;
+            }
+            
+            .app-detail-section {
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .app-header {
+                padding: 25px 15px;
+            }
+            
+            .app-icon {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .app-title {
+                font-size: 24px;
+            }
+            
+            .download-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 应用头部 -->
+        <div class="app-header">
+            <div class="app-icon-container">
+                <div class="app-icon">
+                    <img src="https://i2.qyimage.store:2999/i/bc59bddeb52a4a56" alt="YouTube应用图标">
+                </div>
+            </div>
+            
+            <h1 class="app-title">YouTube</h1>
+            <span class="app-version">官方最新版</span>
+        </div>
+        
+        <!-- 应用详情区域 -->
+        <div class="app-detail-section">
+            <p class="app-description">
+                YouTube官方正版应用，提供最优质的视频观看体验。此版本为官方最新发布版本，确保您获得最完整的功能和最佳的性能。
+            </p>
+            
+            <ul class="features">
+                <li><i class="fas fa-check"></i> 官方正版应用</li>
+                <li><i class="fas fa-check"></i> 高清视频播放</li>
+                <li><i class="fas fa-check"></i> 个性化推荐</li>
+                <li><i class="fas fa-check"></i> 需要科学上网</li>
+            </ul>
+            
+            <!-- 下载区域 -->
+            <div class="download-section">
+                <h2 class="download-title">下载应用</h2>
+                <div class="download-options">
+                    <a href="https://wwwd.qyshare.com:2999/s/y7vthe" class="download-btn" target="_blank">
+                        <span>云盘下载</span>
+                        <i class="fas fa-cloud-download-alt"></i>
+                    </a>
+                    
+                    <a href="https://wwwd.qyshare.com:2999/api/share/download?token=y7vthe&fileId=103169&hostId=1" class="download-btn" target="_blank">
+                        <span>直接下载</span>
+                        <i class="fas fa-download"></i>
+                    </a>
+                </div>
+                
+                <div class="password-note">
+                    <i class="fas fa-key"></i>
+                    <span>云盘下载密码：</span>
+                    <span class="password-code">SanQi1007</span>
+                </div>
+                
+                <div class="notice">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>重要提示：此应用需要科学上网环境才能正常使用</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <footer>
+            <p>&copy; 2025 应用分发中心</p>
+        </footer>
+    </div>
+</body>
+</html>
