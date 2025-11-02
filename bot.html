@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bot自助</title>
+    <title>微信风格聊天机器人</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -564,9 +564,9 @@
             } else {
                 // 处理特殊消息格式
                 if (sender === 'robot' && currentState === 'authorQQ' && isRobotChat) {
-                    content.innerHTML = "作者QQ号码：<span class='copyable' id='qqNumber'>2148438028</span>";
+                    content.innerHTML = "作者QQ号码：\n点击复制☞<span class='copyable' id='qqNumber'>2148438028</span>";
                 } else if (sender === 'robot' && currentState === 'authorTG' && isRobotChat) {
-                    content.innerHTML = "作者TG账号：TG<span class='copyable' id='tgAccount'>@LINFamilys</span>";
+                    content.innerHTML = "作者TG账号：\n点击复制☞<span class='copyable' id='tgAccount'>@LINFamilys</span>";
                 } else {
                     content.textContent = text;
                 }
