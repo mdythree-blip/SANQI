@@ -115,6 +115,12 @@
             margin-left: 10px;
         }
         
+        .ai-avatar {
+            background-color: #3b82f6;
+            color: white;
+            margin-right: 10px;
+        }
+        
         .message-content {
             padding: 12px 15px;
             border-radius: 5px;
@@ -136,6 +142,13 @@
             border-top-right-radius: 0;
             color: #333;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .ai-content {
+            background-color: white;
+            border-top-left-radius: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            color: #333;
         }
         
         /* 选项区域 */
@@ -357,6 +370,11 @@
             background-color: #06ae56;
         }
         
+        .send-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
         /* 响应式设计 */
         @media (max-width: 500px) {
             .chat-container {
@@ -401,6 +419,15 @@
                     <div class="chat-item-time">刚刚</div>
                 </div>
                 
+                <div class="chat-item" id="aiEngineChatItem">
+                    <div class="chat-item-avatar" style="background-color: #3b82f6; color: white;">🧠</div>
+                    <div class="chat-item-info">
+                        <div class="chat-item-name">智能引擎</div>
+                        <div class="chat-item-preview">基于DeepSeek AI的强大智能助手</div>
+                    </div>
+                    <div class="chat-item-time">在线</div>
+                </div>
+                
                 <div class="chat-item" id="userChatItem">
                     <div class="chat-item-avatar" style="background-color: #ff9500; color: white;">🥩</div>
                     <div class="chat-item-info">
@@ -425,6 +452,23 @@
             
             <div class="options-container" id="robotOptionsContainer">
                 <!-- 机器人选项将通过JS动态添加 -->
+            </div>
+        </div>
+        
+        <!-- 智能引擎界面 -->
+        <div class="view" id="aiEngineChatView">
+            <div class="chat-header">
+                <i class="fas fa-chevron-left back-btn" id="backFromAI"></i>
+                <div class="chat-title">智能引擎</div>
+            </div>
+            
+            <div class="chat-history" id="aiEngineChatHistory">
+                <!-- 智能引擎聊天内容将通过JS动态添加 -->
+            </div>
+            
+            <div class="input-container">
+                <input type="text" class="message-input" id="aiMessageInput" placeholder="向智能引擎提问...">
+                <button class="send-btn" id="aiSendBtn">发送</button>
             </div>
         </div>
         
@@ -499,21 +543,27 @@
         // DOM元素
         const chatListView = document.getElementById('chatListView');
         const robotChatView = document.getElementById('robotChatView');
+        const aiEngineChatView = document.getElementById('aiEngineChatView');
         const userChatView = document.getElementById('userChatView');
         
         const robotChatItem = document.getElementById('robotChatItem');
+        const aiEngineChatItem = document.getElementById('aiEngineChatItem');
         const userChatItem = document.getElementById('userChatItem');
         
         const robotChatHistory = document.getElementById('robotChatHistory');
+        const aiEngineChatHistory = document.getElementById('aiEngineChatHistory');
         const userChatHistory = document.getElementById('userChatHistory');
         
         const robotOptionsContainer = document.getElementById('robotOptionsContainer');
         
         const backFromRobot = document.getElementById('backFromRobot');
+        const backFromAI = document.getElementById('backFromAI');
         const backFromUser = document.getElementById('backFromUser');
         
         const messageInput = document.getElementById('messageInput');
+        const aiMessageInput = document.getElementById('aiMessageInput');
         const sendBtn = document.getElementById('sendBtn');
+        const aiSendBtn = document.getElementById('aiSendBtn');
         
         const copyNotification = document.getElementById('copyNotification');
         
@@ -521,12 +571,18 @@
         let currentState = 'root';
         let robotMessageCount = 0;
         let userMessageCount = 0;
+        let aiMessageCount = 0;
+        
+        // DeepSeek API配置
+        const DEEPSEEK_API_KEY = 'sk-311133aa409647529cbe4399d01f7c2b';
+        const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
         
         // 切换视图函数
         function showView(view) {
             // 隐藏所有视图
             chatListView.classList.remove('active');
             robotChatView.classList.remove('active');
+            aiEngineChatView.classList.remove('active');
             userChatView.classList.remove('active');
             
             // 显示指定视图
@@ -534,12 +590,31 @@
         }
         
         // 添加消息到聊天记录
-        function addMessage(text, sender, isRobotChat = true) {
-            const chatHistory = isRobotChat ? robotChatHistory : userChatHistory;
-            const messageCount = isRobotChat ? robotMessageCount : userMessageCount;
+        function addMessage(text, sender, chatType = 'robot') {
+            let chatHistory, messageCount;
+            
+            switch(chatType) {
+                case 'robot':
+                    chatHistory = robotChatHistory;
+                    messageCount = robotMessageCount;
+                    break;
+                case 'ai':
+                    chatHistory = aiEngineChatHistory;
+                    messageCount = aiMessageCount;
+                    break;
+                case 'user':
+                    chatHistory = userChatHistory;
+                    messageCount = userMessageCount;
+                    break;
+            }
             
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}-message`;
+            
+            if (sender === 'ai') {
+                messageDiv.className = `message robot-message`;
+            } else {
+                messageDiv.className = `message ${sender}-message`;
+            }
             
             // 添加时间戳（每3条消息显示一次）
             if (messageCount % 3 === 0) {
@@ -550,11 +625,22 @@
             }
             
             const avatar = document.createElement('div');
-            avatar.className = `avatar ${sender}-avatar`;
-            avatar.textContent = sender === 'robot' ? '🤖' : '🥩';
+            
+            if (sender === 'ai') {
+                avatar.className = `avatar ai-avatar`;
+                avatar.textContent = '🧠';
+            } else {
+                avatar.className = `avatar ${sender}-avatar`;
+                avatar.textContent = sender === 'robot' ? '🤖' : '🥩';
+            }
             
             const content = document.createElement('div');
-            content.className = `message-content ${sender}-content`;
+            
+            if (sender === 'ai') {
+                content.className = `message-content ai-content`;
+            } else {
+                content.className = `message-content ${sender}-content`;
+            }
             
             if (text === 'thinking') {
                 const thinking = document.createElement('div');
@@ -563,17 +649,17 @@
                 content.appendChild(thinking);
             } else {
                 // 处理特殊消息格式
-                if (sender === 'robot' && currentState === 'authorQQ' && isRobotChat) {
+                if (sender === 'robot' && currentState === 'authorQQ' && chatType === 'robot') {
                     content.innerHTML = "作者QQ号码：\n点击复制☞<span class='copyable' id='qqNumber'>2148438028</span>";
-                } else if (sender === 'robot' && currentState === 'authorTG' && isRobotChat) {
+                } else if (sender === 'robot' && currentState === 'authorTG' && chatType === 'robot') {
                     content.innerHTML = "作者TG账号：\n点击复制☞<span class='copyable' id='tgAccount'>@LINFamilys</span>";
                 } else {
                     content.textContent = text;
                 }
             }
             
-            messageDiv.appendChild(sender === 'robot' ? avatar : content);
-            messageDiv.appendChild(sender === 'robot' ? content : avatar);
+            messageDiv.appendChild(sender === 'robot' || sender === 'ai' ? avatar : content);
+            messageDiv.appendChild(sender === 'robot' || sender === 'ai' ? content : avatar);
             
             chatHistory.appendChild(messageDiv);
             
@@ -581,7 +667,7 @@
             chatHistory.scrollTop = chatHistory.scrollHeight;
             
             // 为可复制文本添加事件
-            if (sender === 'robot' && (currentState === 'authorQQ' || currentState === 'authorTG') && isRobotChat) {
+            if (sender === 'robot' && (currentState === 'authorQQ' || currentState === 'authorTG') && chatType === 'robot') {
                 setTimeout(() => {
                     if (currentState === 'authorQQ') {
                         const qqElement = document.getElementById('qqNumber');
@@ -598,10 +684,16 @@
             }
             
             // 更新消息计数
-            if (isRobotChat) {
-                robotMessageCount++;
-            } else {
-                userMessageCount++;
+            switch(chatType) {
+                case 'robot':
+                    robotMessageCount++;
+                    break;
+                case 'ai':
+                    aiMessageCount++;
+                    break;
+                case 'user':
+                    userMessageCount++;
+                    break;
             }
         }
         
@@ -663,10 +755,10 @@
                 
                 optionButton.addEventListener('click', () => {
                     // 添加用户消息
-                    addMessage(option.text, 'user', true);
+                    addMessage(option.text, 'user', 'robot');
                     
                     // 显示机器人思考中
-                    addMessage('thinking', 'robot', true);
+                    addMessage('thinking', 'robot', 'robot');
                     
                     // 禁用选项
                     robotOptionsContainer.innerHTML = '';
@@ -686,7 +778,7 @@
                         currentState = option.next;
                         
                         // 添加机器人回复
-                        addMessage(conversationTree[currentState].message, 'robot', true);
+                        addMessage(conversationTree[currentState].message, 'robot', 'robot');
                         
                         // 显示新选项
                         showOptions(conversationTree[currentState].options);
@@ -700,7 +792,7 @@
         // 初始化机器人聊天
         function initRobotChat() {
             // 添加初始消息
-            addMessage(conversationTree.root.message, 'robot', true);
+            addMessage(conversationTree.root.message, 'robot', 'robot');
             
             // 显示初始选项
             showOptions(conversationTree.root.options);
@@ -717,7 +809,7 @@
             const message = messageInput.value.trim();
             if (message) {
                 // 添加用户消息
-                addMessage(message, 'user', false);
+                addMessage(message, 'user', 'user');
                 
                 // 清空输入框
                 messageInput.value = '';
@@ -732,14 +824,108 @@
                         "感谢您的反馈！"
                     ];
                     const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                    addMessage(randomResponse, 'robot', false);
+                    addMessage(randomResponse, 'robot', 'user');
                 }, 1000);
+            }
+        }
+        
+        // 发送消息到DeepSeek API
+        async function sendAIMessage() {
+            const message = aiMessageInput.value.trim();
+            if (!message) return;
+            
+            // 添加用户消息
+            addMessage(message, 'user', 'ai');
+            
+            // 清空输入框
+            aiMessageInput.value = '';
+            
+            // 禁用发送按钮
+            aiSendBtn.disabled = true;
+            aiSendBtn.textContent = '思考中...';
+            
+            // 显示思考动画
+            addMessage('thinking', 'ai', 'ai');
+            
+            try {
+                const response = await fetch(DEEPSEEK_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [
+                            {
+                                role: 'user',
+                                content: message
+                            }
+                        ],
+                        stream: false
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API请求失败: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // 移除思考消息
+                const messages = aiEngineChatHistory.querySelectorAll('.message');
+                if (messages.length > 0) {
+                    const lastMessage = messages[messages.length - 1];
+                    if (lastMessage.querySelector('.thinking')) {
+                        lastMessage.remove();
+                    }
+                }
+                
+                // 添加AI回复
+                if (data.choices && data.choices.length > 0) {
+                    const aiResponse = data.choices[0].message.content;
+                    addMessage(aiResponse, 'ai', 'ai');
+                } else {
+                    throw new Error('API返回格式异常');
+                }
+            } catch (error) {
+                console.error('调用DeepSeek API时出错:', error);
+                
+                // 移除思考消息
+                const messages = aiEngineChatHistory.querySelectorAll('.message');
+                if (messages.length > 0) {
+                    const lastMessage = messages[messages.length - 1];
+                    if (lastMessage.querySelector('.thinking')) {
+                        lastMessage.remove();
+                    }
+                }
+                
+                // 显示错误消息
+                addMessage('抱歉，智能引擎暂时无法响应，请稍后再试。', 'ai', 'ai');
+            } finally {
+                // 重新启用发送按钮
+                aiSendBtn.disabled = false;
+                aiSendBtn.textContent = '发送';
             }
         }
         
         // 事件监听器
         robotChatItem.addEventListener('click', () => {
             showView(robotChatView);
+        });
+        
+        aiEngineChatItem.addEventListener('click', () => {
+            showView(aiEngineChatView);
+            
+            // 如果AI聊天记录为空，添加欢迎消息
+            if (aiEngineChatHistory.children.length === 0) {
+                const timestamp = document.createElement('div');
+                timestamp.className = 'timestamp';
+                timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                aiEngineChatHistory.appendChild(timestamp);
+                
+                addMessage('您好！我是基于DeepSeek AI的智能引擎，有什么可以帮您的吗？', 'ai', 'ai');
+            }
         });
         
         userChatItem.addEventListener('click', () => {
@@ -750,15 +936,27 @@
             showView(chatListView);
         });
         
+        backFromAI.addEventListener('click', () => {
+            showView(chatListView);
+        });
+        
         backFromUser.addEventListener('click', () => {
             showView(chatListView);
         });
         
         sendBtn.addEventListener('click', sendMessage);
         
+        aiSendBtn.addEventListener('click', sendAIMessage);
+        
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 sendMessage();
+            }
+        });
+        
+        aiMessageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendAIMessage();
             }
         });
         
