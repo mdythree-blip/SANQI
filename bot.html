@@ -398,6 +398,78 @@
         .active {
             display: flex;
         }
+        
+        /* 文件上传区域 */
+        .file-upload-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-upload-btn {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .file-upload-btn:hover {
+            background-color: #2563eb;
+        }
+        
+        .file-upload-btn i {
+            margin-right: 5px;
+        }
+        
+        .file-name {
+            margin-left: 10px;
+            font-size: 14px;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+        
+        /* 上下文记忆指示器 */
+        .context-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .context-indicator i {
+            margin-right: 5px;
+            color: #07c160;
+        }
+        
+        /* 文档消息样式 */
+        .document-message {
+            background-color: #e6f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .document-icon {
+            color: #3b82f6;
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -422,7 +494,7 @@
                 <div class="chat-item" id="aiEngineChatItem">
                     <div class="chat-item-avatar" style="background-color: #3b82f6; color: white;">🧠</div>
                     <div class="chat-item-info">
-                        <div class="chat-item-name">智能引擎</div>
+                        <div class="chat-item-name">智能引擎＊测试版(可能下架)</div>
                         <div class="chat-item-preview">基于DeepSeek AI的强大智能助手</div>
                     </div>
                     <div class="chat-item-time">在线</div>
@@ -432,7 +504,7 @@
                     <div class="chat-item-avatar" style="background-color: #ff9500; color: white;">🥩</div>
                     <div class="chat-item-info">
                         <div class="chat-item-name">自由对话</div>
-                        <div class="chat-item-preview">点击开始自由对话，虽然这没有什么意思</div>
+                        <div class="chat-item-preview">点击开始自由对话，虽然这没有什么意思...</div>
                     </div>
                     <div class="chat-item-time"></div>
                 </div>
@@ -466,9 +538,27 @@
                 <!-- 智能引擎聊天内容将通过JS动态添加 -->
             </div>
             
-            <div class="input-container">
-                <input type="text" class="message-input" id="aiMessageInput" placeholder="向智能引擎提问...">
-                <button class="send-btn" id="aiSendBtn">发送</button>
+            <div class="input-container" style="flex-direction: column; padding-bottom: 80px;">
+                <!-- 文件上传区域 -->
+                <div class="file-upload-container">
+                    <input type="file" class="file-input" id="fileInput" accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png">
+                    <button class="file-upload-btn" id="fileUploadBtn">
+                        <i class="fas fa-file-upload"></i>上传文档
+                    </button>
+                    <div class="file-name" id="fileName">未选择文件</div>
+                </div>
+                
+                <!-- 上下文记忆指示器 -->
+                <div class="context-indicator">
+                    <i class="fas fa-brain"></i>
+                    <span id="contextStatus">上下文记忆已启用 (保留最近10轮对话)</span>
+                </div>
+                
+                <!-- 输入区域 -->
+                <div style="display: flex; width: 100%; margin-top: 10px;">
+                    <input type="text" class="message-input" id="aiMessageInput" placeholder="向智能引擎提问或上传文档进行分析...">
+                    <button class="send-btn" id="aiSendBtn">发送</button>
+                </div>
             </div>
         </div>
         
@@ -567,6 +657,12 @@
         
         const copyNotification = document.getElementById('copyNotification');
         
+        // 新增DOM元素 - 文件上传
+        const fileInput = document.getElementById('fileInput');
+        const fileUploadBtn = document.getElementById('fileUploadBtn');
+        const fileName = document.getElementById('fileName');
+        const contextStatus = document.getElementById('contextStatus');
+        
         // 当前对话状态
         let currentState = 'root';
         let robotMessageCount = 0;
@@ -576,6 +672,10 @@
         // DeepSeek API配置
         const DEEPSEEK_API_KEY = 'sk-311133aa409647529cbe4399d01f7c2b';
         const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
+        
+        // 上下文记忆 - 存储AI对话历史
+        let aiConversationHistory = [];
+        const MAX_CONTEXT_LENGTH = 10; // 最多保留10轮对话
         
         // 切换视图函数
         function showView(view) {
@@ -829,13 +929,96 @@
             }
         }
         
-        // 发送消息到DeepSeek API
-        async function sendAIMessage() {
-            const message = aiMessageInput.value.trim();
+        // 添加文档消息
+        function addDocumentMessage(filename, content, sender = 'user') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${sender}-avatar`;
+            avatar.textContent = sender === 'user' ? '🥩' : '🧠';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = `message-content ${sender}-content`;
+            
+            const documentInfo = document.createElement('div');
+            documentInfo.className = 'document-message';
+            documentInfo.innerHTML = `<i class="fas fa-file document-icon"></i><strong>${filename}</strong>`;
+            
+            const contentText = document.createElement('div');
+            contentText.style.marginTop = '8px';
+            contentText.textContent = content.length > 200 ? content.substring(0, 200) + '...' : content;
+            
+            documentInfo.appendChild(contentText);
+            contentDiv.appendChild(documentInfo);
+            
+            messageDiv.appendChild(sender === 'user' ? contentDiv : avatar);
+            messageDiv.appendChild(sender === 'user' ? avatar : contentDiv);
+            
+            aiEngineChatHistory.appendChild(messageDiv);
+            aiEngineChatHistory.scrollTop = aiEngineChatHistory.scrollHeight;
+            
+            // 添加到上下文记忆
+            if (sender === 'user') {
+                aiConversationHistory.push({
+                    role: 'user',
+                    content: `我上传了一个文件"${filename}"，内容如下：\n${content}`
+                });
+            }
+        }
+        
+        // 处理文件上传
+        function handleFileUpload(file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const filename = file.name;
+                
+                // 显示文档消息
+                addDocumentMessage(filename, content, 'user');
+                
+                // 更新文件名显示
+                fileName.textContent = filename;
+                
+                // 自动发送分析请求
+                setTimeout(() => {
+                    sendAIMessageWithContext(`请分析我上传的文档"${filename}"，并总结其主要内容。`);
+                }, 500);
+            };
+            
+            // 根据文件类型读取内容
+            if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+                reader.readAsText(file);
+            } else if (file.type.startsWith('image/')) {
+                // 对于图片文件，我们只上传文件名和类型信息
+                addDocumentMessage(file.name, `这是一个${file.type}格式的图片文件，大小为${(file.size/1024).toFixed(2)}KB。`, 'user');
+                fileName.textContent = file.name;
+                
+                // 自动发送分析请求
+                setTimeout(() => {
+                    sendAIMessageWithContext(`我上传了一个图片文件"${file.name}"，请根据文件名和文件信息进行分析。`);
+                }, 500);
+            } else {
+                // 对于其他文件类型，只上传基本信息
+                addDocumentMessage(file.name, `文件类型: ${file.type || '未知'}, 大小: ${(file.size/1024).toFixed(2)}KB`, 'user');
+                fileName.textContent = file.name;
+                
+                // 自动发送分析请求
+                setTimeout(() => {
+                    sendAIMessageWithContext(`我上传了一个"${file.name}"文件，请根据文件信息进行分析。`);
+                }, 500);
+            }
+        }
+        
+        // 发送消息到DeepSeek API（带上下文）
+        async function sendAIMessageWithContext(message) {
             if (!message) return;
             
             // 添加用户消息
-            addMessage(message, 'user', 'ai');
+            if (!message.startsWith('我上传了一个文件')) {
+                addMessage(message, 'user', 'ai');
+            }
             
             // 清空输入框
             aiMessageInput.value = '';
@@ -847,7 +1030,21 @@
             // 显示思考动画
             addMessage('thinking', 'ai', 'ai');
             
+            // 将用户消息添加到上下文
+            if (!message.startsWith('我上传了一个文件')) {
+                aiConversationHistory.push({
+                    role: 'user',
+                    content: message
+                });
+            }
+            
             try {
+                // 限制上下文长度
+                if (aiConversationHistory.length > MAX_CONTEXT_LENGTH * 2) {
+                    // 保留系统消息和最近对话
+                    aiConversationHistory = aiConversationHistory.slice(-MAX_CONTEXT_LENGTH * 2);
+                }
+                
                 const response = await fetch(DEEPSEEK_API_URL, {
                     method: 'POST',
                     headers: {
@@ -856,12 +1053,7 @@
                     },
                     body: JSON.stringify({
                         model: 'deepseek-chat',
-                        messages: [
-                            {
-                                role: 'user',
-                                content: message
-                            }
-                        ],
+                        messages: aiConversationHistory,
                         stream: false
                     })
                 });
@@ -885,6 +1077,15 @@
                 if (data.choices && data.choices.length > 0) {
                     const aiResponse = data.choices[0].message.content;
                     addMessage(aiResponse, 'ai', 'ai');
+                    
+                    // 将AI回复添加到上下文
+                    aiConversationHistory.push({
+                        role: 'assistant',
+                        content: aiResponse
+                    });
+                    
+                    // 更新上下文状态指示器
+                    updateContextStatus();
                 } else {
                     throw new Error('API返回格式异常');
                 }
@@ -909,6 +1110,18 @@
             }
         }
         
+        // 更新上下文状态指示器
+        function updateContextStatus() {
+            const contextRounds = Math.floor(aiConversationHistory.length / 2);
+            contextStatus.textContent = `上下文记忆已启用 (保留最近${contextRounds}轮对话)`;
+        }
+        
+        // 发送消息到DeepSeek API
+        async function sendAIMessage() {
+            const message = aiMessageInput.value.trim();
+            await sendAIMessageWithContext(message);
+        }
+        
         // 事件监听器
         robotChatItem.addEventListener('click', () => {
             showView(robotChatView);
@@ -924,7 +1137,15 @@
                 timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 aiEngineChatHistory.appendChild(timestamp);
                 
-                addMessage('您好！我是基于DeepSeek AI的智能引擎，有什么可以帮您的吗？', 'ai', 'ai');
+                addMessage('您好！我是基于DeepSeek AI的智能引擎，支持文档分析和上下文记忆。\n\n此版本为测试版本可能下架，发送请求时请耐心等待，由于无法显示思考内容，因此面对输出量大的等待时间较长，且由于为静态网页，因此尽量不要退出网页，或者可以直接复制再退出\n目前支持TXT文档解析，支持图片信息粗略分析', 'ai', 'ai');
+                
+                // 初始化上下文记忆
+                aiConversationHistory = [{
+                    role: 'system',
+                    content: '你是一个智能助手，支持文档分析和多轮对话。请根据用户上传的文档内容或提出的问题进行回答。'
+                }];
+                
+                updateContextStatus();
             }
         });
         
@@ -957,6 +1178,18 @@
         aiMessageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 sendAIMessage();
+            }
+        });
+        
+        // 文件上传事件监听
+        fileUploadBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFileUpload(file);
             }
         });
         
