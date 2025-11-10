@@ -59,6 +59,18 @@
             font-weight: 500;
         }
         
+        /* 折叠按钮 */
+        .toggle-input-btn {
+            margin-left: auto;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .toggle-input-btn.rotated {
+            transform: rotate(180deg);
+        }
+        
         /* 聊天记录区域 */
         .chat-history {
             flex: 1;
@@ -69,6 +81,11 @@
             background-image: linear-gradient(rgba(245,245,245,0.9), rgba(245,245,245,0.9)), 
                               url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23e9ebee"/><path d="M0,0 L100,100 M100,0 L0,100" stroke="%23d0d0d0" stroke-width="1"/></svg>');
             background-size: 80px;
+            transition: padding-bottom 0.3s ease;
+        }
+        
+        .chat-history.expanded {
+            padding-bottom: 20px;
         }
         
         /* 消息气泡 */
@@ -163,6 +180,11 @@
             display: flex;
             flex-direction: column;
             z-index: 5;
+            transition: transform 0.3s ease;
+        }
+        
+        .options-container.hidden {
+            transform: translateY(100%);
         }
         
         .option {
@@ -338,6 +360,11 @@
             display: flex;
             align-items: center;
             z-index: 5;
+            transition: transform 0.3s ease;
+        }
+        
+        .input-container.hidden {
+            transform: translateY(100%);
         }
         
         .message-input {
@@ -399,7 +426,7 @@
             display: flex;
         }
         
-        /* 文件上传区域 */
+        /* 新增样式 - 文件上传区域 */
         .file-upload-container {
             display: flex;
             align-items: center;
@@ -440,7 +467,7 @@
             text-overflow: ellipsis;
             max-width: 150px;
         }
-        
+                
         /* 上下文记忆指示器 */
         .context-indicator {
             display: flex;
@@ -470,6 +497,12 @@
             color: #3b82f6;
             margin-right: 5px;
         }
+        
+        /* AI引擎输入区域布局调整 */
+        .ai-input-container {
+            flex-direction: column;
+            padding-bottom: 80px;
+        }
     </style>
 </head>
 <body>
@@ -478,7 +511,7 @@
         <!-- 聊天列表界面 -->
         <div class="view active" id="chatListView">
             <div class="chat-header">
-                <div class="chat-title">微信</div>
+                <div class="chat-title">WeChas</div>
             </div>
             
             <div class="chat-list">
@@ -532,13 +565,14 @@
             <div class="chat-header">
                 <i class="fas fa-chevron-left back-btn" id="backFromAI"></i>
                 <div class="chat-title">智能引擎</div>
+                <i class="fas fa-chevron-down toggle-input-btn" id="toggleAIInputBtn" title="隐藏/显示输入区域"></i>
             </div>
             
             <div class="chat-history" id="aiEngineChatHistory">
                 <!-- 智能引擎聊天内容将通过JS动态添加 -->
             </div>
             
-            <div class="input-container" style="flex-direction: column; padding-bottom: 80px;">
+            <div class="input-container ai-input-container" id="aiInputContainer">
                 <!-- 文件上传区域 -->
                 <div class="file-upload-container">
                     <input type="file" class="file-input" id="fileInput" accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png">
@@ -656,12 +690,15 @@
         const aiSendBtn = document.getElementById('aiSendBtn');
         
         const copyNotification = document.getElementById('copyNotification');
-        
-        // 新增DOM元素 - 文件上传
+                // 新增DOM元素 - 文件上传
         const fileInput = document.getElementById('fileInput');
         const fileUploadBtn = document.getElementById('fileUploadBtn');
         const fileName = document.getElementById('fileName');
         const contextStatus = document.getElementById('contextStatus');
+        
+        // 新增DOM元素 - 折叠按钮
+        const toggleAIInputBtn = document.getElementById('toggleAIInputBtn');
+        const aiInputContainer = document.getElementById('aiInputContainer');
         
         // 当前对话状态
         let currentState = 'root';
@@ -937,8 +974,7 @@
             const avatar = document.createElement('div');
             avatar.className = `avatar ${sender}-avatar`;
             avatar.textContent = sender === 'user' ? '🥩' : '🧠';
-            
-            const contentDiv = document.createElement('div');
+                        const contentDiv = document.createElement('div');
             contentDiv.className = `message-content ${sender}-content`;
             
             const documentInfo = document.createElement('div');
@@ -1122,6 +1158,23 @@
             await sendAIMessageWithContext(message);
         }
         
+        // 切换输入区域显示/隐藏
+        function toggleInputArea() {
+            const isHidden = aiInputContainer.classList.contains('hidden');
+            
+            if (isHidden) {
+                // 显示输入区域
+                aiInputContainer.classList.remove('hidden');
+                aiEngineChatHistory.classList.remove('expanded');
+                toggleAIInputBtn.classList.remove('rotated');
+            } else {
+                // 隐藏输入区域
+                aiInputContainer.classList.add('hidden');
+                aiEngineChatHistory.classList.add('expanded');
+                toggleAIInputBtn.classList.add('rotated');
+            }
+        }
+        
         // 事件监听器
         robotChatItem.addEventListener('click', () => {
             showView(robotChatView);
@@ -1137,9 +1190,8 @@
                 timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 aiEngineChatHistory.appendChild(timestamp);
                 
-                addMessage('您好！我是基于DeepSeek AI的智能引擎，支持文档分析和上下文记忆。\n\n此版本为测试版本可能下架，发送请求时请耐心等待，由于无法显示思考内容，因此面对输出量大的等待时间较长，且由于为静态网页，因此尽量不要退出网页，或者可以直接复制再退出\n目前支持TXT文档解析，支持图片信息粗略分析', 'ai', 'ai');
-                
-                // 初始化上下文记忆
+                addMessage('您好！我是基于DeepSeek AI的智能引擎，支持文档分析和上下文记忆。\n\n此版本为测试版本可能下架，发送请求时请耐心等待，由于无法显示思考内容，因此面对输出量大的等待时间较长，且由于为静态网页，因此尽量不要退出网页，或者可以直接复制再退出\n\n点击右上角的小箭头可以隐藏/显示输入框哦～', 'ai', 'ai');
+                                // 初始化上下文记忆
                 aiConversationHistory = [{
                     role: 'system',
                     content: '你是一个智能助手，支持文档分析和多轮对话。请根据用户上传的文档内容或提出的问题进行回答。'
@@ -1192,6 +1244,9 @@
                 handleFileUpload(file);
             }
         });
+        
+        // 折叠按钮事件监听
+        toggleAIInputBtn.addEventListener('click', toggleInputArea);
         
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', () => {
